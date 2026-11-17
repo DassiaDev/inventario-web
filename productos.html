@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - Sistema de Inventario</title>
+    <!-- Iconos vectoriales Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Estilos de la aplicación -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="seccion-productos">
+
+    <!-- Encabezado con estilo moderno y degradado -->
+    <header>
+        <div class="header-prod-inner">
+            <div class="header-prod-title">
+                <h1><i class="fa-solid fa-boxes-stacked"></i> Inventario de Productos</h1>
+            </div>
+            <div class="header-prod-pill">
+                <i class="fa-solid fa-layer-group"></i> Módulo de Catálogo
+            </div>
+        </div>
+    </header>
+
+    <!-- Navegación -->
+    <nav>
+        <div class="nav-prod-inner">
+            <a href="index.html"><i class="fa-solid fa-house"></i> Inicio</a>
+            <a href="productos.html" class="active"><i class="fa-solid fa-table-list"></i> Productos</a>
+            <a href="agregar.html"><i class="fa-solid fa-square-plus"></i> Agregar Producto</a>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main>
+
+        <!-- Barra Superior: Título y Acciones Principales -->
+        <div class="productos-header-top">
+            <div>
+                <h2><i class="fa-solid fa-warehouse"></i> Control de Productos</h2>
+                <p>
+                    Administra existencias, altas, bajas, modificaciones y reportes dentro de esta sección.
+                </p>
+            </div>
+            <div class="productos-acciones-principales">
+                <button type="button" id="btn-toggle-formulario" class="btn-moderno btn-azul">
+                    <i class="fa-solid fa-circle-plus"></i> Nuevo Producto
+                </button>
+                <button type="button" id="btn-exportar-excel" class="btn-moderno btn-verde">
+                    <i class="fa-solid fa-file-excel"></i> Exportar a Excel
+                </button>
+            </div>
+        </div>
+
+        <!-- Tarjetas Resumen de Métricas (KPIs) Estilo Dashboard -->
+        <div class="kpi-container">
+            <div class="kpi-card">
+                <div>
+                    <div class="kpi-titulo">Total Artículos</div>
+                    <div class="kpi-valor" id="kpi-total">4</div>
+                </div>
+                <div class="kpi-icono-box kpi-icono-blue">
+                    <i class="fa-solid fa-box-archive"></i>
+                </div>
+            </div>
+
+            <div class="kpi-card verde">
+                <div>
+                    <div class="kpi-titulo">Total Existencias</div>
+                    <div class="kpi-valor" id="kpi-unidades">245</div>
+                </div>
+                <div class="kpi-icono-box kpi-icono-green">
+                    <i class="fa-solid fa-cubes"></i>
+                </div>
+            </div>
+
+            <div class="kpi-card amarillo">
+                <div>
+                    <div class="kpi-titulo">Stock Bajo (1-10)</div>
+                    <div class="kpi-valor" id="kpi-bajo">0</div>
+                </div>
+                <div class="kpi-icono-box kpi-icono-amber">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+
+            <div class="kpi-card rojo">
+                <div>
+                    <div class="kpi-titulo">Agotados (0 u.)</div>
+                    <div class="kpi-valor" id="kpi-agotado">0</div>
+                </div>
+                <div class="kpi-icono-box kpi-icono-red">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario Integrado: Guardar Nuevo Producto (Dentro de la misma sección) -->
+        <div id="panel-nuevo-producto" class="panel-agregar-producto" style="display: none;">
+            <div class="panel-agregar-titulo">
+                <i class="fa-solid fa-square-plus"></i>
+                <span>Registrar Nuevo Artículo en Inventario</span>
+            </div>
+
+            <div id="alerta-guardado-exito" class="alerta-exito" style="display: none;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-check" style="font-size: 1.2rem;"></i>
+                    <span id="mensaje-exito-texto">Producto guardado correctamente.</span>
+                </div>
+                <button type="button" class="btn-cerrar-modal" onclick="this.parentElement.style.display='none'">&times;</button>
+            </div>
+
+            <form id="form-guardar-producto" novalidate style="box-shadow: none; padding: 0;">
+                <div class="form-grid-productos">
+                    <!-- Nombre del Producto -->
+                    <div class="form-grupo">
+                        <label for="nuevo-nombre">
+                            <i class="fa-solid fa-tag"></i> Nombre del Producto <span class="requerido">*</span>
+                        </label>
+                        <input type="text" id="nuevo-nombre" placeholder="Ej. Lápiz, Cuaderno..." autocomplete="off" required>
+                        <div id="err-nuevo-nombre" class="form-error-msg"></div>
+                    </div>
+
+                    <!-- Categoría -->
+                    <div class="form-grupo">
+                        <label for="nuevo-categoria">
+                            <i class="fa-solid fa-folder-tree"></i> Categoría <span class="requerido">*</span>
+                        </label>
+                        <input type="text" id="nuevo-categoria" list="sugerencias-categorias" placeholder="Ej. Papelería, Tecnología..." autocomplete="off" required>
+                        <datalist id="sugerencias-categorias">
+                            <option value="Papelería">
+                            <option value="Tecnología">
+                            <option value="Limpieza">
+                            <option value="Mobiliario">
+                            <option value="Oficina">
+                        </datalist>
+                        <div id="err-nuevo-categoria" class="form-error-msg"></div>
+                    </div>
+
+                    <!-- Cantidad / Existencia -->
+                    <div class="form-grupo">
+                        <label for="nuevo-existencia">
+                            <i class="fa-solid fa-boxes-stacked"></i> Cantidad en Existencia <span class="requerido">*</span>
+                        </label>
+                        <input type="number" id="nuevo-existencia" placeholder="0" min="0" step="1" required>
+                        <div id="err-nuevo-existencia" class="form-error-msg"></div>
+                    </div>
+
+                    <!-- Descripción Opcional -->
+                    <div class="form-grupo form-group-full">
+                        <label for="nuevo-descripcion">
+                            <i class="fa-solid fa-align-left"></i> Descripción (Opcional)
+                        </label>
+                        <input type="text" id="nuevo-descripcion" placeholder="Detalles o especificaciones del artículo...">
+                        <div id="err-nuevo-descripcion" class="form-error-msg"></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end;">
+                    <button type="button" id="btn-cancelar-guardado" class="btn-moderno btn-gris">
+                        <i class="fa-solid fa-xmark"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-moderno btn-azul">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Producto
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Filtros y Búsqueda en Vivo -->
+        <div class="filtros-card">
+            <div class="filtro-item" style="flex: 2;">
+                <input type="text" id="input-buscar" placeholder="🔍 Buscar por nombre, categoría o código ID..." autocomplete="off">
+            </div>
+
+            <div class="filtro-item">
+                <select id="filtro-categoria">
+                    <option value="">Todas las categorías</option>
+                    <option value="Papelería">Papelería</option>
+                </select>
+            </div>
+
+            <div class="filtro-item">
+                <select id="filtro-stock">
+                    <option value="">Todos los estados</option>
+                    <option value="disponible">🟢 En existencia (> 10)</option>
+                    <option value="bajo">🟡 Stock bajo (1 a 10)</option>
+                    <option value="agotado">🔴 Agotado (0 unidades)</option>
+                </select>
+            </div>
+
+            <div>
+                <button type="button" id="btn-limpiar-filtros" class="btn-moderno btn-gris" style="padding: 10px 16px;">
+                    <i class="fa-solid fa-rotate-left"></i> Limpiar
+                </button>
+            </div>
+
+            <div class="filtro-info">
+                <span id="contador-productos-texto">Mostrando 4 de 4 productos</span>
+                <span id="btn-restaurar-demo" style="cursor: pointer; text-decoration: underline; color: #2563eb; font-weight: 600;">
+                    <i class="fa-solid fa-arrow-rotate-right"></i> Restaurar catálogo por defecto
+                </span>
+            </div>
+        </div>
+
+        <!-- Tabla Personalizada Moderna -->
+        <div class="tabla-moderna-wrapper">
+            <table class="tabla-moderna">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th>Producto</th>
+                        <th style="width: 180px;">Categoría</th>
+                        <th class="text-center" style="width: 130px;">Existencia</th>
+                        <th class="text-center" style="width: 170px;">Estado</th>
+                        <th class="text-center" style="width: 220px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-productos-body">
+                    <!-- Fila 1 por defecto -->
+                    <tr>
+                        <td><span class="td-id-code">#01</span></td>
+                        <td>
+                            <span class="td-producto-nombre">Lápiz</span>
+                            <span class="td-producto-desc">Lápiz para escritura</span>
+                        </td>
+                        <td><span class="badge-cat">Papelería</span></td>
+                        <td class="text-center" style="font-size: 1.05rem; font-weight: 700;">120</td>
+                        <td class="text-center">
+                            <span class="badge-status badge-disponible">
+                                <span class="status-dot dot-verde"></span> En existencia
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="acciones-td">
+                                <button type="button" class="btn-accion-tabla btn-modificar" data-id="1" title="Modificar este producto">
+                                    <i class="fa-solid fa-pen-to-square"></i> Modificar
+                                </button>
+                                <button type="button" class="btn-accion-tabla btn-eliminar" data-id="1" data-nombre="Lápiz" title="Eliminar este producto">
+                                    <i class="fa-solid fa-trash-can"></i> Eliminar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Fila 2 por defecto -->
+                    <tr>
+                        <td><span class="td-id-code">#02</span></td>
+                        <td>
+                            <span class="td-producto-nombre">Cuaderno</span>
+                            <span class="td-producto-desc">Cuaderno de notas</span>
+                        </td>
+                        <td><span class="badge-cat">Papelería</span></td>
+                        <td class="text-center" style="font-size: 1.05rem; font-weight: 700;">50</td>
+                        <td class="text-center">
+                            <span class="badge-status badge-disponible">
+                                <span class="status-dot dot-verde"></span> En existencia
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="acciones-td">
+                                <button type="button" class="btn-accion-tabla btn-modificar" data-id="2" title="Modificar este producto">
+                                    <i class="fa-solid fa-pen-to-square"></i> Modificar
+                                </button>
+                                <button type="button" class="btn-accion-tabla btn-eliminar" data-id="2" data-nombre="Cuaderno" title="Eliminar este producto">
+                                    <i class="fa-solid fa-trash-can"></i> Eliminar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Fila 3 por defecto -->
+                    <tr>
+                        <td><span class="td-id-code">#03</span></td>
+                        <td>
+                            <span class="td-producto-nombre">Borrador</span>
+                            <span class="td-producto-desc">Borrador para lápiz</span>
+                        </td>
+                        <td><span class="badge-cat">Papelería</span></td>
+                        <td class="text-center" style="font-size: 1.05rem; font-weight: 700;">35</td>
+                        <td class="text-center">
+                            <span class="badge-status badge-disponible">
+                                <span class="status-dot dot-verde"></span> En existencia
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="acciones-td">
+                                <button type="button" class="btn-accion-tabla btn-modificar" data-id="3" title="Modificar este producto">
+                                    <i class="fa-solid fa-pen-to-square"></i> Modificar
+                                </button>
+                                <button type="button" class="btn-accion-tabla btn-eliminar" data-id="3" data-nombre="Borrador" title="Eliminar este producto">
+                                    <i class="fa-solid fa-trash-can"></i> Eliminar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Fila 4 por defecto -->
+                    <tr>
+                        <td><span class="td-id-code">#04</span></td>
+                        <td>
+                            <span class="td-producto-nombre">Regla</span>
+                            <span class="td-producto-desc">Regla de 30 cm</span>
+                        </td>
+                        <td><span class="badge-cat">Papelería</span></td>
+                        <td class="text-center" style="font-size: 1.05rem; font-weight: 700;">40</td>
+                        <td class="text-center">
+                            <span class="badge-status badge-disponible">
+                                <span class="status-dot dot-verde"></span> En existencia
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="acciones-td">
+                                <button type="button" class="btn-accion-tabla btn-modificar" data-id="4" title="Modificar este producto">
+                                    <i class="fa-solid fa-pen-to-square"></i> Modificar
+                                </button>
+                                <button type="button" class="btn-accion-tabla btn-eliminar" data-id="4" data-nombre="Regla" title="Eliminar este producto">
+                                    <i class="fa-solid fa-trash-can"></i> Eliminar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Mensaje cuando no hay registros -->
+            <div id="mensaje-sin-datos" style="display: none; padding: 50px 20px; text-align: center; color: #64748b;">
+                <div style="font-size: 42px; margin-bottom: 12px; color: #94a3b8;">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <h4 style="color: #0f172a; font-size: 1.15rem; margin-bottom: 6px;">No se encontraron productos</h4>
+                <p style="font-size: 0.95rem;">No hay artículos que coincidan con la búsqueda o el inventario está vacío.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ============================================================
+         MODAL: MODIFICAR PRODUCTO (DENTRO DE LA MISMA SECCIÓN)
+         ============================================================ -->
+    <div id="modal-modificar" class="modal-backdrop-custom">
+        <div class="modal-caja">
+            <div class="modal-cabecera">
+                <h3>
+                    <i class="fa-solid fa-pen-to-square" style="color: #2563eb;"></i>
+                    Modificar Producto <span id="mod-id-badge" class="badge-cat" style="margin-left: 8px;">#0</span>
+                </h3>
+                <button type="button" id="btn-cerrar-modal-mod" class="btn-cerrar-modal">&times;</button>
+            </div>
+
+            <form id="form-modificar-producto" novalidate style="box-shadow: none; padding: 0;">
+                <div class="modal-cuerpo">
+                    <input type="hidden" id="mod-id">
+
+                    <div class="form-grupo" style="margin-bottom: 18px;">
+                        <label for="mod-nombre">
+                            <i class="fa-solid fa-tag"></i> Nombre del Producto <span class="requerido">*</span>
+                        </label>
+                        <input type="text" id="mod-nombre" required>
+                        <div id="err-mod-nombre" class="form-error-msg"></div>
+                    </div>
+
+                    <div class="form-grupo" style="margin-bottom: 18px;">
+                        <label for="mod-categoria">
+                            <i class="fa-solid fa-folder-tree"></i> Categoría <span class="requerido">*</span>
+                        </label>
+                        <input type="text" id="mod-categoria" required>
+                        <div id="err-mod-categoria" class="form-error-msg"></div>
+                    </div>
+
+                    <div class="form-grupo" style="margin-bottom: 18px;">
+                        <label for="mod-existencia">
+                            <i class="fa-solid fa-boxes-stacked"></i> Cantidad en Existencia <span class="requerido">*</span>
+                        </label>
+                        <input type="number" id="mod-existencia" min="0" step="1" required>
+                        <div id="err-mod-existencia" class="form-error-msg"></div>
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="mod-descripcion">
+                            <i class="fa-solid fa-align-left"></i> Descripción
+                        </label>
+                        <textarea id="mod-descripcion" rows="3"></textarea>
+                        <div id="err-mod-descripcion" class="form-error-msg"></div>
+                    </div>
+                </div>
+
+                <div class="modal-pie">
+                    <button type="button" id="btn-cancelar-modal-mod" class="btn-moderno btn-gris">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-moderno btn-azul">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL: ELIMINAR PRODUCTO (DENTRO DE LA MISMA SECCIÓN)
+         ============================================================ -->
+    <div id="modal-eliminar" class="modal-backdrop-custom">
+        <div class="modal-caja" style="max-width: 450px;">
+            <div class="modal-cabecera" style="background: #fef2f2;">
+                <h3 style="color: #991b1b;">
+                    <i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i>
+                    Confirmar Eliminación
+                </h3>
+                <button type="button" id="btn-cerrar-modal-del" class="btn-cerrar-modal">&times;</button>
+            </div>
+
+            <div class="modal-cuerpo" style="text-align: center; padding: 28px 24px;">
+                <div style="font-size: 42px; color: #dc2626; margin-bottom: 14px;">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+                <p style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                    ¿Deseas dar de baja este producto?
+                </p>
+                <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 16px; line-height: 1.45;">
+                    Se eliminará permanentemente: <br>
+                    <strong id="eliminar-producto-nombre" style="color: #0f172a; font-size: 1.05rem;">-</strong>
+                    <span id="eliminar-producto-id" class="badge-cat" style="margin-left: 6px;">#0</span>
+                </p>
+                <div style="background: #fffbeb; color: #92400e; padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; text-align: left; border: 1px solid #fde68a;">
+                    <i class="fa-solid fa-circle-info"></i> Esta acción no se puede deshacer una vez confirmada.
+                </div>
+            </div>
+
+            <div class="modal-pie" style="justify-content: center;">
+                <button type="button" id="btn-cancelar-modal-del" class="btn-moderno btn-gris">
+                    Cancelar
+                </button>
+                <button type="button" id="btn-confirmar-eliminar-accion" class="btn-moderno btn-rojo">
+                    <i class="fa-solid fa-trash-can"></i> Sí, Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor para Notificaciones Toast Flotantes -->
+    <div id="toast-contenedor" class="toast-contenedor"></div>
+
+    <footer>
+        Sistema de Inventario
+    </footer>
+
+    <!-- Librería SheetJS (XLSX) para exportar reporte a Excel directamente -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Lógica de Negocio y Funcionalidades de la Sección de Productos -->
+    <script src="inventario.js"></script>
+
+</body>
+
+</html>
